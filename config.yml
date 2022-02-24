@@ -1,0 +1,55 @@
+okapi-url: "http://localhost:9130"
+registry-url: "http://folio-registry.aws.indexdata.com"
+install-json-path: "/file/path/to/platform-complete/install.json" # web url like https://raw.githubusercontent.com/folio-org/platform-complete/master/install.json can also be set
+env-vars: # any key-pairs added here will be added to the OKAPI env service
+  DB_PASSWORD: folio_admin
+  DB_USERNAME: folio_admin
+  DB_DATABASE: okapi_modules
+  DB_HOST: postgres
+  DB_PORT: '5432'
+  OKAPI_URL: "http://localhost:9130"
+  KAFKA_HOST: kafka
+  KAFKA_PORT: '9092'
+  ELASTICSEARCH_URL: http://localhost:9200
+be-modules: # list the FOLIO backend modules you would like to spin up
+    ## CORE: ensure that core FOLIO modules are first on this list
+    - mod-permissions
+    - mod-configuration
+    - mod-login
+    - mod-users
+    - mod-users-bl
+    - mod-authtoken
+    ## END CORE
+    - mod-data-import
+    - mod-di-converter-storage
+    - mod-source-record-manager
+    - mod-source-record-storage
+    - mod-inventory
+    - mod-inventory-storage
+    - mod-organizations
+    - mod-organizations-storage
+    - mod-entities-links
+    - mod-data-export
+    - mod-invoice
+    - mod-invoice-storage
+    - mod-orders
+    - mod-orders-storage
+    - mod-pubsub
+    - mod-tags
+    - mod-finance
+    - mod-finance-storage
+    - mod-circulation-storage
+    - mod-circulation
+    - mod-password-validator
+    - mod-login-saml
+    - mod-consortia
+ui-modules:
+  - folio_users
+  - folio_data-import
+  - folio_tenant-settings
+  - folio_organizations
+  - folio_inventory
+  - folio_invoice
+  - folio_orders
+  - folio_finance
+  - folio_consortia-settings
