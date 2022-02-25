@@ -1,121 +1,57 @@
-import time
-import socket
+import cmd2
 import yaml
 from pathlib import Path
-from typing import Dict
-
-MOD_REGISTRY_URL = "http://folio-registry.aws.indexdata.com"
-LOCAL_OKAPI_URL = "http://host.docker.internal:3000"
-TENANT_ID = "diku"
-tenant_name = 'Datalogisk Institut'
-tenant_desc = 'Danish Library Technology Institute'
-ADMIN_USER_ID = None
-ADMIN_USER = {
-    "username": "diku_admin",
-    "password": "admin",
-    "first_name": "",
-    "last_name": "Superuser",
-    "email": "admin@example.org",
-    "perms_users_assign": "yes"
-}
-MINIMAL_MOD_NAMES = ['mod-data-import',
-                     'mod-source-record-manager',
-                     'mod-source-record-storage',
-                     'mod-data-import-converter-storage']
-
-MINIMAL_MOD_DATA = []
-
-OKAPI_ENV = [
-    {"name": "DB_HOST", "value": f"host.docker.internal"},
-    {"name": "DB_PORT", "value": f"5432"},
-    {"name": "DB_DATABASE", "value": f"okapi"},
-    {"name": "DB_USERNAME", "value": f"folio_admin"},
-    {"name": "DB_PASSWORD", "value": f"password"},
-    {"name": "DB_MAXPOOLSIZE", "value": f"20"},
-    {"name": "KAFKA_HOST", "value": f"host.docker.internal"},
-    {"name": "KAFKA_PORT", "value": f"9092"},
-    {"name": "ENV", "value": f"dev"},
-    {"name": "ELASTICSEARCH_URL", "value": f"http://host.docker.internal:9200"},
-    {"name": "OKAPI_URL", "value": LOCAL_OKAPI_URL},
-    {"name": "JAVA_DEBUG", "value": f"true"}
-]
-CONFIG_YAML: dict = None
 
 
-def main():
-    my_env = {}
-    my_env['DB_PASSWORD'] = 'password'
-    my_env['DB_USERNAME'] = 'folio_admin'
-    my_env['DB_DATABASE'] = 'okapi'
-    my_env['DB_HOST'] = 'host.docker.internal'
-    my_env['DB_PORT'] = '5432'
-    my_env['OKAPI_URL'] = LOCAL_OKAPI_URL
-    my_env['KAFKA_HOST'] = 'host.docker.internal'
-    my_env['KAFKA_PORT'] = '9092'
+from cmd2 import with_argparser
+from busybee import global_vars, modules
 
-    p = Path(__file__).with_name('.busybee.yml')
-    with p.open("r") as f:
-        CONFIG_YAML = yaml.safe_load(f)
+Module = modules.Module
+DebugInfo = modules.module.DebugInfo
 
-    # start okapi
-    import folio_mods
-    import steps
+class BusyBee(cmd2.Cmd):
 
-    modules_config: dict = CONFIG_YAML.get('modules')
-    modules: Dict[str, folio_mods.Module] = {}
-    for module_name, module_config in modules_config.items():
-        if module_name.casefold() == 'okapi'.casefold():
-            modules[module_name] = folio_mods.Okapi(
-                module_config.get('descriptor_location', None),
-                module_config.get('jar_location'),
-                module_config.get('port')).start(
-                    my_env, module_config.get('show_output', False))
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        p = Path(__file__).with_name('.busybee.yml')
+        with p.open("r") as f:
+            config = yaml.safe_load(f)
+        modules.init_folio_modules(config)
+        global_vars.CONFIG_YAML = config
+
+        self.poutput('Ready for your commands!')
+        self.register_postloop_hook(modules.terminate_folio_modules)
+
+    debug_argparser = cmd2.Cmd2ArgumentParser()
+    debug_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module')
+    debug_argparser.add_argument('-p', '--port', type=int, required=True, help='port that will be used for debug')
+    debug_argparser.add_argument('-s', '--suspend', action='store_true', help='wait for debugger to connect')
+
+    @with_argparser(debug_argparser)
+    def do_debug(self, args):
+        """set a module to debug mode"""
+        module_name = args.module
+        debug_port = args.port
+        suspend = args.suspend
+        if module_name in global_vars.MODULES:
+            self.poutput(f'redeploying module {module_name} with debug port {debug_port} and suspend is {suspend}')
+            module: Module = global_vars.MODULES[module_name]
+            module.with_debug_info(DebugInfo(port=debug_port, should_suspend=suspend))
+            self.poutput('redeployment complete!')
         else:
-            modules[module_name] = folio_mods.Module(
-                module_name,
-                module_config.get('descriptor_location', None),
-                module_config.get('jar_location'),
-                module_config.get('port')).start(
-                    my_env, module_config.get('show_output', False))
+            self.perror(f'module {module_name} is not available. check config and logs.')
 
-    try:
-        time.sleep(10)
-        # check that okapi or mock server is enabled
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        from urllib.parse import urlparse
-        result = sock.connect_ex((urlparse(LOCAL_OKAPI_URL).hostname,
-                                  urlparse(LOCAL_OKAPI_URL).port))
-        if not result == 0:
-            raise Exception(
-                "Okapi url not valid. Check that okapi or mock server is running")
+    redeploy_argparser = cmd2.Cmd2ArgumentParser()
+    redeploy_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module')
 
-        # register modules
-        for module in modules.values():
-            steps.register_module(LOCAL_OKAPI_URL, module)
-
-        # deploy modules to urls
-        for module in modules.values():
-            steps.deploy_module_to_http_loc(LOCAL_OKAPI_URL, module)
-
-        # create tenant
-        steps.create_tenant(
-            LOCAL_OKAPI_URL, {'id': "diku", 'name': 'Datalogisk Institut', 'description': 'Danish Library Technology Institute'})
-
-        # set env vars for modules
-        steps.set_module_env_vars(LOCAL_OKAPI_URL, OKAPI_ENV)
-
-        # enable modules for tenant
-        steps.enable_modules_for_tenant(
-            LOCAL_OKAPI_URL, TENANT_ID, modules.values())
-
-        # wait for keyboard input
-        while(True):
-            user_input = input("Type exit to quit\n")
-            if user_input.casefold() == 'exit'.casefold():
-                break
-    finally:
-        for module in modules.values():
-            module.terminate()
-
-if __name__ == "__main__":
-    main()
+    @with_argparser(redeploy_argparser)
+    def do_redeploy(self, args):
+        module_name = args.module
+        if module_name in global_vars.MODULES:
+            self.poutput(f'redeploying module {module_name}')
+            module: Module = global_vars.MODULES[module_name]
+            module.redeploy()
+            self.poutput('redeployment complete!')
+        else:
+            self.perror(f'module {module_name} is not available. check config and logs.')

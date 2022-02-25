@@ -2,7 +2,9 @@ import os
 import requests
 import json
 
-from folio_mods.module import Module
+
+from ..modules import Module
+
 
 def register_module(okapi_url, module: Module, check_deps=False) -> dict:
     module_descriptor: dict = None
@@ -16,7 +18,7 @@ def register_module(okapi_url, module: Module, check_deps=False) -> dict:
             module_descriptor = json.load(f)
     else:
         raise Exception("not a valid location for a module descriptor")
-    
+
     print(f'registering module from location: {module_descriptor_location}')
 
     # check if module is already registered
@@ -30,7 +32,7 @@ def register_module(okapi_url, module: Module, check_deps=False) -> dict:
             json=module_descriptor,
             params={'check': str(check_deps).lower()},
             headers={"X-Okapi-Tenant": "supertenant",
-                        'Content-type': 'application/json', 'Accept': 'text/plain'})
+                     'Content-type': 'application/json', 'Accept': 'text/plain'})
         if (not reg_resp.status_code == 200) and (not reg_resp.status_code == 201):
             raise Exception(f'could not register module: {reg_resp.text}')
 

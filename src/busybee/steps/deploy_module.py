@@ -1,5 +1,5 @@
 from typing import List
-from folio_mods import Module, Okapi
+from ..modules import Module, Okapi
 import requests
 import uuid
 
