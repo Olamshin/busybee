@@ -2,17 +2,18 @@ import cmd2
 import yaml
 from pathlib import Path
 
-
 from cmd2 import with_argparser
 from busybee import global_vars, modules
 
 Module = modules.Module
 DebugInfo = modules.module.DebugInfo
 
+
 class BusyBee(cmd2.Cmd):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.prompt = ">>"
 
         p = Path(__file__).with_name('.busybee.yml')
         with p.open("r") as f:
@@ -23,8 +24,12 @@ class BusyBee(cmd2.Cmd):
         self.poutput('Ready for your commands!')
         self.register_postloop_hook(modules.terminate_folio_modules)
 
+    def module_name_choice_provider(self):
+        return global_vars.MODULES.keys()
+
     debug_argparser = cmd2.Cmd2ArgumentParser()
-    debug_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module')
+    debug_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module',
+                                 choices_provider=module_name_choice_provider)
     debug_argparser.add_argument('-p', '--port', type=int, required=True, help='port that will be used for debug')
     debug_argparser.add_argument('-s', '--suspend', action='store_true', help='wait for debugger to connect')
 
@@ -43,7 +48,8 @@ class BusyBee(cmd2.Cmd):
             self.perror(f'module {module_name} is not available. check config and logs.')
 
     redeploy_argparser = cmd2.Cmd2ArgumentParser()
-    redeploy_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module')
+    redeploy_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module',
+                                    choices_provider=module_name_choice_provider)
 
     @with_argparser(redeploy_argparser)
     def do_redeploy(self, args):

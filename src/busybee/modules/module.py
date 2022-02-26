@@ -1,9 +1,10 @@
+import logging
 import subprocess
 import threading
 import os
 import shutil
-import busybee
-
+import logging
+from logging.handlers import RotatingFileHandler
 
 class DebugInfo:
     def __init__(self, port, should_suspend):
@@ -12,8 +13,12 @@ class DebugInfo:
 
 
 def output_reader(proc_name, proc):
+    logger = logging.getLogger(proc_name)
+    logger.setLevel(logging.INFO)
+    handler = RotatingFileHandler(f'{proc_name}.log', maxBytes=500000, backupCount=10)
+    logger.addHandler(handler)
     for line in iter(proc.stdout.readline, b''):
-        print(f"{proc_name}: {line.decode('utf-8')}")
+        logger.info(line.decode('utf-8'))
 
 
 class Module:
