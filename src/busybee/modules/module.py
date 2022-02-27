@@ -6,6 +6,9 @@ import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 
+from busybee.global_vars import LOG_DIR, JAR_DIR
+
+
 class DebugInfo:
     def __init__(self, port, should_suspend):
         self.port = port
@@ -13,11 +16,10 @@ class DebugInfo:
 
 
 def output_reader(proc_name, proc):
-    log_dir = "logs"
     logger = logging.getLogger(proc_name)
     logger.setLevel(logging.INFO)
-    os.makedirs(log_dir, exist_ok=True)
-    handler = RotatingFileHandler(os.path.join(log_dir, f'{proc_name}.log'), maxBytes=1000000, backupCount=10)
+    os.makedirs(LOG_DIR, exist_ok=True)
+    handler = RotatingFileHandler(os.path.join(LOG_DIR, f'{proc_name}.log'), maxBytes=1000000, backupCount=10)
     logger.addHandler(handler)
     for line in iter(proc.stdout.readline, b''):
         logger.info(line.decode('utf-8'))
@@ -40,8 +42,11 @@ class Module:
 
     def start(self, env, show_output=False):
         self.last_env_vars = env
-        shutil.copyfile(self.jar_location, self.jar_file_name,
+        # copy jars from various locations
+        os.makedirs(JAR_DIR, exist_ok=True)
+        shutil.copyfile(self.jar_location, os.path.join(JAR_DIR, self.jar_file_name),
                         follow_symlinks=True)
+
         cmd = self.build_cmd()
         print(cmd)
         self.proc = subprocess.Popen(cmd,
@@ -73,7 +78,7 @@ class Module:
             result += f'-agentlib:jdwp=transport=dt_socket,server=y,' \
                       f'suspend={"y" if self.debug_info.suspend else "n"}' \
                       f',address=0.0.0.0:{self.debug_info.port} '
-        result += f'-jar {self.jar_file_name}'
+        result += f'-jar {os.path.join(JAR_DIR, self.jar_file_name)}'
         return result
 
     def terminate(self):

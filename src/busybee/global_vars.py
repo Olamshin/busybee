@@ -49,3 +49,6 @@ ENV_VARS['KAFKA_HOST'] = 'localhost'
 ENV_VARS['KAFKA_PORT'] = '9092'
 
 MODULES = {}
+
+JAR_DIR = 'folio_jars'
+LOG_DIR = 'logs'

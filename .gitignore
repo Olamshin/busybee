@@ -130,8 +130,8 @@ dmypy.json
 
 .vscode
 .idea
-*.jar
 
 .busybee.yml
 /storage/
 /logs/
+/folio_jars/
