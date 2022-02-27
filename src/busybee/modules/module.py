@@ -13,9 +13,11 @@ class DebugInfo:
 
 
 def output_reader(proc_name, proc):
+    log_dir = "logs"
     logger = logging.getLogger(proc_name)
     logger.setLevel(logging.INFO)
-    handler = RotatingFileHandler(f'{proc_name}.log', maxBytes=500000, backupCount=10)
+    os.makedirs(log_dir, exist_ok=True)
+    handler = RotatingFileHandler(os.path.join(log_dir, f'{proc_name}.log'), maxBytes=1000000, backupCount=10)
     logger.addHandler(handler)
     for line in iter(proc.stdout.readline, b''):
         logger.info(line.decode('utf-8'))

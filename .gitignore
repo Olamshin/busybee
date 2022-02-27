@@ -134,3 +134,4 @@ dmypy.json
 
 .busybee.yml
 /storage/
+/logs/
