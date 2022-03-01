@@ -4,7 +4,9 @@ import threading
 import os
 import shutil
 import logging
+import shlex
 from logging.handlers import RotatingFileHandler
+from time import sleep
 
 from busybee.global_vars import LOG_DIR, JAR_DIR
 
@@ -15,15 +17,14 @@ class DebugInfo:
         self.suspend = should_suspend
 
 
-def output_reader(proc_name, proc):
-    logger = logging.getLogger(proc_name)
-    logger.setLevel(logging.INFO)
-    os.makedirs(LOG_DIR, exist_ok=True)
-    handler = RotatingFileHandler(os.path.join(LOG_DIR, f'{proc_name}.log'), maxBytes=1000000, backupCount=10)
-    logger.addHandler(handler)
-    for line in iter(proc.stdout.readline, b''):
-        logger.info(line.decode('utf-8'))
+def output_reader(logger, proc, exit_event):
+        for line in iter(proc.stdout.readline, b''):
+            if exit_event.is_set():
+                break
+            logger.info(line.decode('utf-8'))
 
+
+os.makedirs(LOG_DIR, exist_ok=True)
 
 class Module:
 
@@ -36,12 +37,19 @@ class Module:
         self.http_port: int = http_port
         self.debug_info: DebugInfo = None
         self.proc: subprocess.Popen[bytes] = None
+        self.exit_event: threading.Event = threading.Event()
 
         self.last_env_vars = None
         self.last_show_output = None
 
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(logging.INFO)
+        self.log_handler = RotatingFileHandler(os.path.join(LOG_DIR, f'{name}.log'), maxBytes=1000000, backupCount=10)
+        self.logger.addHandler(self.log_handler)
+
     def start(self, env, show_output=False):
         self.last_env_vars = env
+        self.last_show_output = show_output
         # copy jars from various locations
         os.makedirs(JAR_DIR, exist_ok=True)
         shutil.copyfile(self.jar_location, os.path.join(JAR_DIR, self.jar_file_name),
@@ -49,14 +57,16 @@ class Module:
 
         cmd = self.build_cmd()
         print(cmd)
-        self.proc = subprocess.Popen(cmd,
+        args = shlex.split(cmd)
+        self.proc = subprocess.Popen(args,
                                      env=env,
                                      stdout=subprocess.PIPE if show_output else subprocess.DEVNULL,
                                      stderr=subprocess.STDOUT if show_output else subprocess.DEVNULL,
-                                     shell=True)
+                                     shell=False)
         if show_output:
+            self.exit_event = threading.Event()
             t = threading.Thread(target=output_reader,
-                                 args=(self.name, self.proc,))
+                                 args=(self.logger, self.proc, self.exit_event))
             t.start()
 
         return self
@@ -82,5 +92,7 @@ class Module:
         return result
 
     def terminate(self):
+        self.exit_event.set()
         self.proc.terminate()
+        sleep(1)
         return self
