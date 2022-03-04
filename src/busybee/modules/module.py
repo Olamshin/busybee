@@ -94,5 +94,5 @@ class Module:
     def terminate(self):
         self.exit_event.set()
         self.proc.terminate()
-        sleep(1)
+        sleep(3)
         return self
