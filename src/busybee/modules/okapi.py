@@ -7,7 +7,7 @@ class Okapi(Module):
         super().__init__('okapi', descriptor_location, jar_location, port)
 
     def build_cmd(self):
-        sys_props = f'''-Dokapiurl="http://localhost:3000" \
+        sys_props = f'''-Dokapiurl="http://localhost:9999" \
 -Dstorage=postgres \
 -Dpostgres_username=folio_admin \
 -Dpostgres_password=password \

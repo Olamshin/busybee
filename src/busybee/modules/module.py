@@ -77,6 +77,10 @@ class Module:
         self.start(self.last_env_vars, self.last_show_output)
         return self
 
+    def down(self):
+        self.terminate()
+        self.proc = None
+
     def redeploy(self):
         self.terminate()
         self.start(self.last_env_vars, self.last_show_output)
@@ -84,6 +88,12 @@ class Module:
     def build_cmd(self):
         result = 'java '
         result += f'-Dhttp.port={self.http_port} '
+        result += '-javaagent:/Users/okolawole/Downloads/jars/opentelemetry-javaagent.jar '
+        result += '-Dotel.instrumentation.common.default-enabled=false '
+        result += '-Dotel.javaagent.extensions=/Users/okolawole/git/folio/opentelemetry-folio-instrumentation/opentelemetry-folio/javaagent/build/libs/otel-javaagent-folio-1.0-all.jar '
+        result += '-Dotel.instrumentation.folio.enabled=false '
+        result += '-Dotel.instrumentation.netty.enabled=false '
+        result += '-Dotel.javaagent.debug=false '
         if self.debug_info is not None:
             result += f'-agentlib:jdwp=transport=dt_socket,server=y,' \
                       f'suspend={"y" if self.debug_info.suspend else "n"}' \
@@ -91,8 +101,10 @@ class Module:
         result += f'-jar {os.path.join(JAR_DIR, self.jar_file_name)}'
         return result
 
-    def terminate(self):
+    def terminate(self, shouldWait=True):
         self.exit_event.set()
-        self.proc.terminate()
-        sleep(3)
+        if self.proc:
+            self.proc.terminate()
+        if shouldWait:
+            sleep(3)
         return self

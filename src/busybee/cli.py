@@ -61,3 +61,19 @@ class BusyBee(cmd2.Cmd):
             self.poutput('redeployment complete!')
         else:
             self.perror(f'module {module_name} is not available. check config and logs.')
+
+    down_argparser = cmd2.Cmd2ArgumentParser()
+    down_argparser.add_argument('-m', '--module', type=str, required=True, help='name of the module',
+                                    choices_provider=module_name_choice_provider)
+
+    @with_argparser(down_argparser)
+    def do_down(self, args):
+        module_name = args.module
+        if module_name in global_vars.MODULES:
+            self.poutput(f'downing module {module_name}')
+            module: Module = global_vars.MODULES[module_name]
+            module.down()
+            self.poutput('module is down!')
+        else:
+            self.perror(f'module {module_name} is not available. check config and logs.')
+

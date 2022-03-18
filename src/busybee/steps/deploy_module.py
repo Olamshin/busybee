@@ -30,6 +30,14 @@ def deploy_module_to_http_loc(okapi_url, module: Module):
 
 
 def enable_modules_for_tenant(okapi_url, tenant_id, modules: List[Module]):
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
+
+    httpSession = requests.Session()
+    retries = Retry(total=5, backoff_factor=2,
+                    status_forcelist=[400, 500, 502, 503, 504],
+                    method_whitelist=["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"])
+    httpSession.mount('http://', HTTPAdapter(max_retries=retries))
     print('###############')
     print('ENABLING MODULES TO TENANT')
     print('###############')
@@ -39,9 +47,9 @@ def enable_modules_for_tenant(okapi_url, tenant_id, modules: List[Module]):
             continue
 
         print(f"enabling module({module.descriptor_json['id']}) for tenant({tenant_id})")
-        resp = requests.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
+        resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
                              json=[{"id": module.descriptor_json['id'], "action": "enable"}],
-                             params={"deploy": "false",
+                             params={"deploy": "true",
                                      "tenantParameters": "loadReference%3dtrue%2cloadSample%3dtrue"},
                              headers={"X-Okapi-Tenant": "supertenant"})
         if resp.status_code != 201 and resp.status_code != 200 and 'has no launchDescriptor' not in resp.text:
