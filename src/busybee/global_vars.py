@@ -1,7 +1,7 @@
 from typing import Dict
 
 MOD_REGISTRY_URL = "http://folio-registry.aws.indexdata.com"
-LOCAL_OKAPI_URL = "http://localhost:9999"
+LOCAL_OKAPI_URL = "http://localhost:9130"
 TENANT_ID = "diku"
 tenant_name = 'Datalogisk Institut'
 tenant_desc = 'Danish Library Technology Institute'
@@ -53,3 +53,6 @@ MODULES = {}
 
 JAR_DIR = 'folio_jars'
 LOG_DIR = 'logs'
+
+OTEL_TRACES_EXPORTER = 'jaeger'
+OTEL_EXPORTER_JAEGER_ENDPOINT = 'http://olamimacmini:14250'

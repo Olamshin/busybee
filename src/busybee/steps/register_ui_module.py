@@ -11,28 +11,35 @@ def get_module_descriptors(ui_modules: list):
     print('##########################')
     print('Getting Module Descriptors')
     print('##########################')
+    cache_file_name = '.mod_descriptors.json'
     module_descriptors = {}
-    with open("/Users/okolawole/git/folio/platform-complete/install.json", "r") as f:
-        data = json.load(f)
-        for module in data:
-            # derive module name
-            module_id = ''
-            module_name = ''
-            match = re.search(r'^([\w-]*)\-\d+.\d+[.\d+]*.*', module['id'])
-            if match is not None:
-                module_id = match.group(0)
-                module_name = match.group(1)
+    if(not os.path.exists(cache_file_name)):
+        with open("/Users/okolawole/git/folio/platform-complete/install.json", "r") as f:
+            data = json.load(f)
+            for module in data:
+                # derive module name
+                module_id = ''
+                module_name = ''
+                match = re.search(r'^([\w-]*)\-\d+.\d+[.\d+]*.*', module['id'])
+                if match is not None:
+                    module_id = match.group(0)
+                    module_name = match.group(1)
 
-            if module_name in ui_modules:
-                print(f"FOUND UI MODULE: {module_name}")
-                module_desc_data = requests.get(
-                    f"{MOD_REGISTRY_URL}/_/proxy/modules/{module_id}")
-                if module_desc_data.status_code != 200:
-                    continue
+                if module_name in ui_modules:
+                    print(f"FOUND UI MODULE: {module_name}")
+                    module_desc_data = requests.get(
+                        f"{MOD_REGISTRY_URL}/_/proxy/modules/{module_id}")
+                    if module_desc_data.status_code != 200:
+                        continue
 
-                json_data = json.loads(module_desc_data.text)
-                module_descriptors[module_name] = {
-                    'id': module_id, 'desc': json_data}
+                    json_data = json.loads(module_desc_data.text)
+                    module_descriptors[module_name] = {
+                        'id': module_id, 'desc': json_data}
+        with open(cache_file_name, 'w') as f:
+            f.write(json.dumps(module_descriptors))
+    else:
+        with open(cache_file_name, 'r') as f:
+            module_descriptors = json.load(f)
                 
     return module_descriptors
 

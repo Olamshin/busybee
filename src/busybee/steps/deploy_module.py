@@ -50,7 +50,7 @@ def enable_modules_for_tenant(okapi_url, tenant_id, modules: List[Module]):
         resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
                              json=[{"id": module.descriptor_json['id'], "action": "enable"}],
                              params={"deploy": "true",
-                                     "tenantParameters": "loadReference%3dtrue%2cloadSample%3dtrue"},
+                                     "tenantParameters": "loadReference=true,loadSample=true"},
                              headers={"X-Okapi-Tenant": "supertenant"})
         if resp.status_code != 201 and resp.status_code != 200 and 'has no launchDescriptor' not in resp.text:
             raise Exception(

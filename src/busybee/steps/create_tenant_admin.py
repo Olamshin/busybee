@@ -1,5 +1,6 @@
 import requests
 import uuid
+import jmespath
 
 
 def create_tenant_admin(okapi_url: str, tenant_id: str, admin_user: dict):
@@ -108,22 +109,14 @@ def create_tenant_admin(okapi_url: str, tenant_id: str, admin_user: dict):
     if resp.status_code != 200:
         raise Exception(f"could not get permission record: {resp.text}")
     perm_json = resp.json()
+    top_level_perms = set_tenant_admin_permissions(okapi_url, tenant_id, admin_user_id)
     if perm_json['totalRecords'] == 0:
         # create permission record
         resp = httpSession.post(f"{okapi_url}/perms/users",
                              headers={"X-Okapi-Tenant": tenant_id},
                              json={
                                  "userId": admin_user_id,
-                                 "permissions": ["perms.all", "users.all", "okapi.all", "ui-users.view", 
-                                 "ui-users.edit",
-                                 "settings.data-import.enabled",
-                                 "data-import.upload.all",
-                                 "module.data-import.enabled",
-                                 "module.organizations.enabled",
-                                 "organizations.module.all",
-                                 "module.inventory.enabled",
-                                 "module.tenant-settings.enabled"
-                                 ]
+                                 "permissions": top_level_perms
                              })
         if resp.status_code != 201:
             raise Exception(f"could not create permission record: {resp.text}")
@@ -149,3 +142,36 @@ def create_tenant_admin(okapi_url: str, tenant_id: str, admin_user: dict):
 
     # enable authtoken
     set_authtoken_status(True)
+
+def set_tenant_admin_permissions(okapi_url: str, tenant_id, user_id):
+    from requests.adapters import HTTPAdapter
+    from requests.packages.urllib3.util.retry import Retry
+
+    httpSession = requests.Session()
+    retries = Retry(
+        total=5,
+        backoff_factor=2,
+        status_forcelist=[400, 500, 502, 503, 504],
+        method_whitelist=["HEAD", "GET", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"],
+    )
+    httpSession.mount("http://", HTTPAdapter(max_retries=retries))
+
+    resp = httpSession.get(
+        f"{okapi_url}/perms/permissions",
+        params={
+            "query": "cql.allRecords=1 not permissionName==okapi.* not permissionName==perms.users.assign.okapi not permissionName==modperms.* not permissionName==SYS#*",
+            "length": "5000",
+        },
+        headers={"X-Okapi-Tenant": tenant_id},
+    )
+
+    if resp.status_code != 200:
+        raise Exception(f"something happened when getting all permissions: {resp.text}")
+
+    expression = jmespath.compile("permissions[?length(childOf[?starts_with(@,'SYS#')]) == length(childOf)].permissionName")
+    top_level_perms = expression.search(resp.json())
+    return top_level_perms
+
+# set_tenant_admin_permissions('http://localhost:9130', 'diku', )
+
+    

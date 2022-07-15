@@ -20,13 +20,6 @@ def init_folio_modules(config):
     modules_config: dict = config.get("modules")
     for module_name, module_config in modules_config.items():
         env: dict = busybee.global_vars.ENV_VARS.copy()
-        env.update(
-            {
-                "OTEL_SERVICE_NAME": module_name,
-                "OTEL_TRACES_EXPORTER": "jaeger",
-                "OTEL_EXPORTER_JAEGER_ENDPOINT": "http://olamimacmini:14250"
-            }
-        )
 
         if module_name.casefold() == "okapi".casefold():
             busybee.global_vars.MODULES[module_name] = Okapi(

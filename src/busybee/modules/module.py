@@ -8,7 +8,7 @@ import shlex
 from logging.handlers import RotatingFileHandler
 from time import sleep
 
-from busybee.global_vars import LOG_DIR, JAR_DIR
+from busybee.global_vars import LOG_DIR, JAR_DIR, OTEL_TRACES_EXPORTER, OTEL_EXPORTER_JAEGER_ENDPOINT
 
 
 class DebugInfo:
@@ -88,11 +88,19 @@ class Module:
     def build_cmd(self):
         result = 'java '
         result += f'-Dhttp.port={self.http_port} '
-        result += '-javaagent:/Users/okolawole/Downloads/jars/opentelemetry-javaagent.jar '
+        result += f'-Dserver.port={self.http_port} '
+        result += '-javaagent:/Users/okolawole/Downloads/jars/aws-opentelemetry-agent.jar '
+        result += f'-Dotel.resource.attributes=service.name={self.name},service.namespace=olamide '
+        result += f'-Dotel.exporter.jaeger.endpoint={OTEL_EXPORTER_JAEGER_ENDPOINT} '
+        result += f'-Dotel.traces.exporter={OTEL_TRACES_EXPORTER} '
+        result += '-Dotel.traces.sampler=traceidratio '
+        result += '-Dotel.traces.sampler.arg=1 '
         result += '-Dotel.instrumentation.common.default-enabled=false '
-        result += '-Dotel.javaagent.extensions=/Users/okolawole/git/folio/opentelemetry-folio-instrumentation/opentelemetry-folio/javaagent/build/libs/otel-javaagent-folio-1.0-all.jar '
-        result += '-Dotel.instrumentation.folio.enabled=false '
+        result += '-Dotel.javaagent.extensions=/Users/okolawole/git/folio/opentelemetry-folio-instrumentation/opentelemetry-folio/javaagent/build/libs/folio-otel-javaagent-extensions-1.0-SNAPSHOT-all.jar '
+        result += '-Dotel.instrumentation.folio.enabled=true '
         result += '-Dotel.instrumentation.netty.enabled=false '
+        result += '-Dotel.instrumentation.opentelemetry-api.enabled=false '
+        result += '-Dotel.instrumentation.kafka.enabled=false '
         result += '-Dotel.javaagent.debug=false '
         if self.debug_info is not None:
             result += f'-agentlib:jdwp=transport=dt_socket,server=y,' \
