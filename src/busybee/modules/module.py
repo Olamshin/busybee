@@ -93,6 +93,7 @@ class Module:
         result += f'-Dotel.resource.attributes=service.name={self.name},service.namespace=olamide '
         result += f'-Dotel.exporter.jaeger.endpoint={OTEL_EXPORTER_JAEGER_ENDPOINT} '
         result += f'-Dotel.traces.exporter={OTEL_TRACES_EXPORTER} '
+        result += '-Dotel.metrics.exporter=none '
         result += '-Dotel.traces.sampler=traceidratio '
         result += '-Dotel.traces.sampler.arg=1 '
         result += '-Dotel.instrumentation.common.default-enabled=false '
