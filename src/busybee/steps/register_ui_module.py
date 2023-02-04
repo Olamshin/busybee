@@ -86,11 +86,17 @@ def enable_ui_modules_for_tenant(okapi_url, tenant_id):
     print('###############')
     # deploy minimal modules to the tenant
     for module in UI_MODULE_DATA.values():
+        resp = requests.get(
+        f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules/{module['id']}")
 
-        print(f"enabling ui module({module['id']}) for tenant({tenant_id})")
-        resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
-                             json=[{"id": module['id'], "action": "enable"}],
-                             headers={"X-Okapi-Tenant": "supertenant"})
-        if resp.status_code != 201 and resp.status_code != 200:
-            raise Exception(
-                f"could not create enable module({module['id']}) for tenant({tenant_id}): {resp.text}")
+        # if module is not enabled, enable it
+        if resp.status_code == 404:
+            print(f"enabling ui module({module['id']}) for tenant({tenant_id})")
+            resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules",
+                                json={"id": module['id']},
+                                headers={"X-Okapi-Tenant": "supertenant"})
+            if resp.status_code != 201 and resp.status_code != 200:
+                raise Exception(
+                    f"could not create enable module({module['id']}) for tenant({tenant_id}): {resp.text}")
+        else:
+            print(f"module({module['id']}) is already enabled for tenant({tenant_id})")

@@ -31,7 +31,7 @@ class Module:
     def __init__(self, name, descriptor_location, jar_location, http_port):
         self.name = name
         self.descriptor_location = descriptor_location
-        self.descriptor_json = None
+        self.descriptor_json = {}
         self.jar_location = jar_location
         self.jar_file_name = os.path.basename(jar_location)
         self.http_port: int = http_port

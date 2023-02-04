@@ -18,15 +18,14 @@ from ..steps import (
 def init_folio_modules(config):
     # start okapi
     modules_config: dict = config.get("modules")
+    okapi_module_name = None
+    okapi_module_config = {}
     for module_name, module_config in modules_config.items():
         env: dict = busybee.global_vars.ENV_VARS.copy()
 
         if module_name.casefold() == "okapi".casefold():
-            busybee.global_vars.MODULES[module_name] = Okapi(
-                module_config.get("descriptor_location", None),
-                module_config.get("jar_location"),
-                module_config.get("port"),
-            ).start(env, module_config.get("show_output", False))
+            okapi_module_name = module_name
+            okapi_module_config = module_config
         else:
             busybee.global_vars.MODULES[module_name] = Module(
                 module_name,
@@ -36,8 +35,20 @@ def init_folio_modules(config):
             ).start(env, module_config.get("show_output", False))
         time.sleep(1)
     try:
+        #######################################
         print("waiting for modules to spin up")
         time.sleep(15)
+        print('start okapi')
+        busybee.global_vars.MODULES[okapi_module_name] = Okapi(
+                okapi_module_config.get("descriptor_location", None),
+                okapi_module_config.get("jar_location"),
+                okapi_module_config.get("port"),
+            ).start(busybee.global_vars.ENV_VARS.copy()
+            , okapi_module_config.get("show_output", False))
+        print("waiting for okapi to spin up")
+        time.sleep(15)
+        ##############################################
+
         # check that okapi or mock server is enabled
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         from urllib.parse import urlparse

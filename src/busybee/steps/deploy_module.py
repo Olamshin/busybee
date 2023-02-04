@@ -46,12 +46,19 @@ def enable_modules_for_tenant(okapi_url, tenant_id, modules: List[Module]):
         if type(module) is Okapi:
             continue
 
-        print(f"enabling module({module.descriptor_json['id']}) for tenant({tenant_id})")
-        resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
-                             json=[{"id": module.descriptor_json['id'], "action": "enable"}],
-                             params={"deploy": "true",
-                                     "tenantParameters": "loadReference=true,loadSample=true"},
-                             headers={"X-Okapi-Tenant": "supertenant"})
-        if resp.status_code != 201 and resp.status_code != 200 and 'has no launchDescriptor' not in resp.text:
-            raise Exception(
-                f"could not create enable module({module.descriptor_json['id']}) for tenant({tenant_id}): {resp.text}")
+        resp = requests.get(
+        f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules/{module.descriptor_json['id']}")
+
+        # if module is not enabled, enable it
+        if resp.status_code == 404:
+            print(f"enabling module({module.descriptor_json['id']}) for tenant({tenant_id})")        
+            resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules",
+                                json={"id": module.descriptor_json['id']},
+                                params={"tenantParameters": "loadReference=true,loadSample=true"},
+                                headers={"X-Okapi-Tenant": "supertenant"})
+            if resp.status_code != 201 and resp.status_code != 200 and 'has no launchDescriptor' not in resp.text:
+                raise Exception(
+                    f"could not create enable module({module.descriptor_json['id']}) for tenant({tenant_id}): {resp.text}")
+            print(f"enabled module({module.descriptor_json['id']}) for tenant({tenant_id})")
+        else:
+            print(f"module({module.descriptor_json['id']}) is already enabled for tenant({tenant_id})")

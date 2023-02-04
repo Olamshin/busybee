@@ -137,3 +137,5 @@ dmypy.json
 /folio_jars/
 
 .DS_Store
+
+.mod_descriptors.json

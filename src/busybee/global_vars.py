@@ -31,7 +31,7 @@ OKAPI_ENV = [
     {"name": "KAFKA_HOST", "value": f"vagrant"},
     {"name": "KAFKA_PORT", "value": f"9092"},
     {"name": "ENV", "value": f"dev"},
-    {"name": "ELASTICSEARCH_URL", "value": f"http://vagrant:9200"},
+    {"name": "ELASTICSEARCH_URL", "value": f"http://olamimacmini:9200"},
     {"name": "OKAPI_URL", "value": LOCAL_OKAPI_URL},
     {"name": "JAVA_DEBUG", "value": f"true"}
 
@@ -48,6 +48,7 @@ ENV_VARS['DB_PORT'] = '5432'
 ENV_VARS['OKAPI_URL'] = LOCAL_OKAPI_URL
 ENV_VARS['KAFKA_HOST'] = 'vagrant'
 ENV_VARS['KAFKA_PORT'] = '9092'
+ENV_VARS['ELASTICSEARCH_URL'] = 'http://olamimacmini:9200'
 
 MODULES = {}
 
