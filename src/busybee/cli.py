@@ -77,3 +77,13 @@ class BusyBee(cmd2.Cmd):
         else:
             self.perror(f'module {module_name} is not available. check config and logs.')
 
+    create_tenant_argparser = cmd2.Cmd2ArgumentParser()
+    create_tenant_argparser.add_argument('-n', '--name', type=str, required=True, help='name of the tenant')
+    create_tenant_argparser.add_argument('-a', '--admin', type=str, required=False, help='name of the admin user')
+    @with_argparser(create_tenant_argparser)
+    def do_create_tenant(self, args):
+        tenant_name = args.name
+        tenant_admin_name = args.admin or "diku_admin"
+        modules.util_create_tenant(tenant_name, tenant_admin_name)
+        
+

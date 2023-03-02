@@ -11,7 +11,7 @@ from ..steps import (
     enable_modules_for_tenant,
     create_tenant_admin,
     register_ui_modules,
-    enable_ui_modules_for_tenant
+    enable_ui_modules_for_tenant,
 )
 
 
@@ -38,13 +38,15 @@ def init_folio_modules(config):
         #######################################
         print("waiting for modules to spin up")
         time.sleep(15)
-        print('start okapi')
+        print("start okapi")
         busybee.global_vars.MODULES[okapi_module_name] = Okapi(
-                okapi_module_config.get("descriptor_location", None),
-                okapi_module_config.get("jar_location"),
-                okapi_module_config.get("port"),
-            ).start(busybee.global_vars.ENV_VARS.copy()
-            , okapi_module_config.get("show_output", False))
+            okapi_module_config.get("descriptor_location", None),
+            okapi_module_config.get("jar_location"),
+            okapi_module_config.get("port"),
+        ).start(
+            busybee.global_vars.ENV_VARS.copy(),
+            okapi_module_config.get("show_output", False),
+        )
         print("waiting for okapi to spin up")
         time.sleep(15)
         ##############################################
@@ -99,8 +101,8 @@ def init_folio_modules(config):
         )
 
         enable_ui_modules_for_tenant(
-            busybee.global_vars.LOCAL_OKAPI_URL,
-            busybee.global_vars.TENANT_ID)
+            busybee.global_vars.LOCAL_OKAPI_URL, busybee.global_vars.TENANT_ID
+        )
 
         # create admin user
         create_tenant_admin(
@@ -123,3 +125,41 @@ def init_folio_modules(config):
 def terminate_folio_modules() -> None:
     for module in busybee.global_vars.MODULES.values():
         module.terminate(False)
+
+
+def util_create_tenant(name, admin_username) -> None:
+    # create tenant
+    create_tenant(
+        busybee.global_vars.LOCAL_OKAPI_URL,
+        {
+            "id": name,
+            "name": "Busybee Tenant",
+            "description": "Busybee Tenant",
+        },
+    )
+
+    enable_modules_for_tenant(
+        busybee.global_vars.LOCAL_OKAPI_URL,
+        name,
+        busybee.global_vars.MODULES.values(),
+    )
+
+    enable_ui_modules_for_tenant(
+        busybee.global_vars.LOCAL_OKAPI_URL, name
+    )
+
+    # create admin user
+    new_admin = busybee.global_vars.ADMIN_USER.copy()
+    new_admin['username'] = admin_username
+    create_tenant_admin(
+        busybee.global_vars.LOCAL_OKAPI_URL,
+        name,
+        new_admin,
+    )
+
+    # enable modules for tenant again, creating the admin user needed some modules disabled
+    enable_modules_for_tenant(
+        busybee.global_vars.LOCAL_OKAPI_URL,
+        name,
+        busybee.global_vars.MODULES.values(),
+    )

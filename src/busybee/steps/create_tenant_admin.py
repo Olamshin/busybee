@@ -28,9 +28,8 @@ def create_tenant_admin(okapi_url: str, tenant_id: str, admin_user: dict):
         if authtoken_module_json != [] and is_enabled is False:
             # authtoken is enabled, disable it
             authtoken_module_id = authtoken_module_json[0]['id']
-            resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
-                                    json=[{'id': authtoken_module_id, 'action': 'disable'}])
-            if resp.status_code != 200:
+            resp = httpSession.delete(f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules/{authtoken_module_id}")
+            if resp.status_code != 204:
                 raise Exception(
                     f"could not disable authtoken module: {resp.text}")
         elif (authtoken_module_json == [] and is_enabled is True):
@@ -44,9 +43,9 @@ def create_tenant_admin(okapi_url: str, tenant_id: str, admin_user: dict):
             elif len(resp_json) > 0 and resp.status_code == 200:
                 authtoken_module_id = resp_json[0]["id"]
             # authtoken is disabled, enable it
-            resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/install",
-                                    json=[{'id': authtoken_module_id, 'action': 'enable'}])
-            if resp.status_code != 200:
+            resp = httpSession.post(f"{okapi_url}/_/proxy/tenants/{tenant_id}/modules",
+                                    json={'id': authtoken_module_id})
+            if resp.status_code != 201:
                 raise Exception(
                     f"could not disable authtoken module: {resp.text}")
 
@@ -159,7 +158,7 @@ def set_tenant_admin_permissions(okapi_url: str, tenant_id, user_id):
     resp = httpSession.get(
         f"{okapi_url}/perms/permissions",
         params={
-            "query": "cql.allRecords=1 not permissionName==okapi.* not permissionName==perms.users.assign.okapi not permissionName==modperms.* not permissionName==SYS#*",
+            "query": "cql.allRecords=1 not permissionName==perms.users.assign.okapi not permissionName==modperms.* not permissionName==SYS#*",
             "length": "5000",
         },
         headers={"X-Okapi-Tenant": tenant_id},
