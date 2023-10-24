@@ -3,15 +3,15 @@ import requests
 import json
 
 
-from ..modules import Module
+from ..modules import Module, ModuleInterface
 
 
-def register_module(okapi_url, module: Module, check_deps=False) -> dict:
-    module_descriptor: dict = None
+def register_module(okapi_url, module: ModuleInterface, check_deps=False) -> dict:
+    module_descriptor: dict = {}
     module_descriptor_location = module.descriptor_location
 
     if module_descriptor_location is None:
-        return
+        return {}
 
     if os.path.exists(module_descriptor_location):
         with open(module_descriptor_location, "r") as f:

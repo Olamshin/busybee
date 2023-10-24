@@ -1,10 +1,10 @@
-from typing import List
-from ..modules import Module, Okapi
+from typing import Iterable, List
+from ..modules import Module, ModuleInterface, Okapi
 import requests
 import uuid
 
 
-def deploy_module_to_http_loc(okapi_url, module: Module):
+def deploy_module_to_http_loc(okapi_url, module: ModuleInterface):
     if module.descriptor_json is None and not type(module) is Okapi:
         raise Exception(f'module is probably not registered: {module}')
 
@@ -29,9 +29,9 @@ def deploy_module_to_http_loc(okapi_url, module: Module):
         raise Exception(f"Could not set deployment location: {resp.text}")
 
 
-def enable_modules_for_tenant(okapi_url, tenant_id, modules: List[Module]):
+def enable_modules_for_tenant(okapi_url, tenant_id, modules: Iterable[ModuleInterface]):
     from requests.adapters import HTTPAdapter
-    from requests.packages.urllib3.util.retry import Retry
+    from urllib3.util.retry import Retry
 
     httpSession = requests.Session()
     retries = Retry(total=5, backoff_factor=2,

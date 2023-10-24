@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+.resourceCache
 *.py[cod]
 *$py.class
 
@@ -131,12 +132,7 @@ dmypy.json
 .vscode
 .idea
 
-.busybee.yml
+.busybee
 /storage/
-/logs/
-/folio_jars/
 
 .DS_Store
-
-.mod_descriptors.json
-.resourceCache

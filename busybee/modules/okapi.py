@@ -12,7 +12,7 @@ class Okapi(Module):
 -Dpostgres_username=folio_admin \
 -Dpostgres_password=password \
 -Dpostgres_database=okapi \
--Dpostgres_host=vagrant \
+-Dpostgres_host=olamiebsco \
 '''
         result = 'java '
         result += f'-Dhttp.port={self.http_port} \\'

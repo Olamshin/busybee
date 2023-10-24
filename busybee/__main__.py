@@ -1,6 +1,6 @@
-import cli
+from .cli import BusyBee
 import sys
 
 if __name__ == "__main__":
-    app = cli.BusyBee()
+    app = BusyBee()
     sys.exit(app.cmdloop())

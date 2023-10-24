@@ -3,6 +3,7 @@ import re
 import os
 import json
 import requests
+from busybee.global_vars import GlobalVars
 
 MOD_REGISTRY_URL = "http://folio-registry.aws.indexdata.com"
 UI_MODULE_DATA = {}
@@ -11,9 +12,9 @@ def get_module_descriptors(ui_modules: list):
     print('##########################')
     print('Getting Module Descriptors')
     print('##########################')
-    cache_file_name = '.mod_descriptors.json'
+    cache_file = os.path.join(GlobalVars.BASE_DIR, '.mod_descriptors.json')
     module_descriptors = {}
-    if(not os.path.exists(cache_file_name)):
+    if(not os.path.exists(cache_file)):
         with open("/Users/okolawole/git/folio/platform-complete/install.json", "r") as f:
             data = json.load(f)
             for module in data:
@@ -35,10 +36,10 @@ def get_module_descriptors(ui_modules: list):
                     json_data = json.loads(module_desc_data.text)
                     module_descriptors[module_name] = {
                         'id': module_id, 'desc': json_data}
-        with open(cache_file_name, 'w') as f:
+        with open(cache_file, 'w') as f:
             f.write(json.dumps(module_descriptors))
     else:
-        with open(cache_file_name, 'r') as f:
+        with open(cache_file, 'r') as f:
             module_descriptors = json.load(f)
                 
     return module_descriptors
@@ -74,7 +75,7 @@ def register_ui_modules(okapi_url: str, ui_modules: list):
 
 def enable_ui_modules_for_tenant(okapi_url, tenant_id):
     from requests.adapters import HTTPAdapter
-    from requests.packages.urllib3.util.retry import Retry
+    from urllib3.util.retry import Retry
 
     httpSession = requests.Session()
     retries = Retry(total=5, backoff_factor=2,
