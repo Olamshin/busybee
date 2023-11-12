@@ -27,7 +27,10 @@ async def log_output(stream, log_func):
     while True:
         data = await stream.read(CHUNK_SIZE)
         if data:
-            log_func(data.decode('utf-8'))
+            try:
+                log_func(data.decode('utf-8', errors='replace'))
+            except UnicodeDecodeError as e:
+                print(f"Error at position {e.start}: {e.reason}")
         else:
             break
 
