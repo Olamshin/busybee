@@ -10,7 +10,7 @@ class Okapi(Module):
         sys_props = f'''-Dokapiurl="http://localhost:9130" \
 -Dstorage=postgres \
 -Dpostgres_username=folio_admin \
--Dpostgres_password=password \
+-Dpostgres_password=folio_admin \
 -Dpostgres_database=okapi \
 -Dpostgres_host=olamiebsco \
 '''

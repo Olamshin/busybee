@@ -35,7 +35,7 @@ class GlobalVars:
         {"name": "DB_PORT", "value": f"5432"},
         {"name": "DB_DATABASE", "value": f"okapi"},
         {"name": "DB_USERNAME", "value": f"folio_admin"},
-        {"name": "DB_PASSWORD", "value": f"password"},
+        {"name": "DB_PASSWORD", "value": f"folio_admin"},
         {"name": "DB_MAXPOOLSIZE", "value": f"20"},
         {"name": "KAFKA_HOST", "value": f"olamiebsco"},
         {"name": "KAFKA_PORT", "value": f"9092"},
@@ -48,7 +48,7 @@ class GlobalVars:
     CONFIG_YAML: dict[str, Any] = {}
 
     ENV_VARS = {}
-    ENV_VARS["DB_PASSWORD"] = "password"
+    ENV_VARS["DB_PASSWORD"] = "folio_admin"
     ENV_VARS["DB_USERNAME"] = "folio_admin"
     ENV_VARS["DB_DATABASE"] = "okapi"
     ENV_VARS["DB_HOST"] = "olamiebsco"
