@@ -1,6 +1,6 @@
 okapi-url: "http://localhost:9130"
 registry-url: "http://folio-registry.aws.indexdata.com"
-install-json-path: "/file/path/to/platform-complete/install.json" # web url like https://raw.githubusercontent.com/folio-org/platform-complete/master/install.json can also be set
+install-json-path: "/file/path/to/platform-complete/install.json" # web url like https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json can also be set
 env-vars: # any key-pairs added here will be added to the OKAPI env service
   DB_PASSWORD: folio_admin
   DB_USERNAME: folio_admin
@@ -43,7 +43,6 @@ be-modules: # list the FOLIO backend modules you would like to spin up
     - mod-circulation
     - mod-password-validator
     - mod-login-saml
-    - mod-consortia
 ui-modules:
   - folio_users
   - folio_data-import
@@ -53,4 +52,3 @@ ui-modules:
   - folio_invoice
   - folio_orders
   - folio_finance
-  - folio_consortia-settings
