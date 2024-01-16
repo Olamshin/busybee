@@ -4,6 +4,7 @@ certifi==2021.10.8
 charset-normalizer==2.0.12
 cmd2==2.4.0
 idna==3.3
+jmespath==1.0.0
 pyperclip==1.8.2
 PyYAML==6.0
 requests==2.27.1
