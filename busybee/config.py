@@ -1,12 +1,12 @@
 import os
 import shutil
 
-
-USER_HOME_DIR = os.path.expanduser("~/.busybee")
+DIRECTORY_NAME = '.busybee'
+USER_HOME_DIR = os.path.join(os.path.expanduser("~"), DIRECTORY_NAME)
 
 CONFIG_LOCATIONS = [
     os.path.join(USER_HOME_DIR, "config.yml"),
-    os.path.normpath("./busybee.yml"),
+    os.path.normpath(os.path.join(".", DIRECTORY_NAME)),
 ]
 
 class MissingConfigurationException(Exception):
