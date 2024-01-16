@@ -11,6 +11,7 @@ env-vars: # any key-pairs added here will be added to the OKAPI env service
   KAFKA_HOST: kafka
   KAFKA_PORT: '9092'
   ELASTICSEARCH_URL: http://localhost:9200
+  SYSTEM_USER_PASSWORD: system_user_password
 be-modules: # list the FOLIO backend modules you would like to spin up
     ## CORE: ensure that core FOLIO modules are first on this list
     - mod-permissions
