@@ -1,4 +1,5 @@
 from argparse import Namespace
+from json import JSONDecodeError
 import cmd2
 import os
 import sys
@@ -29,6 +30,11 @@ class BusyBeeCli(cmd2.Cmd):
             self.perror(f'Could not start BusyBee: {e}')
             config_path = os.path.normpath(os.path.abspath(gen_config()))
             self.poutput(f'Update configuration file generated at {config_path}')
+            sys.exit()
+        except JSONDecodeError as e:
+            error_message = "A JSONDecodeError occurred: " + str(e)
+            error_message += "\nThe problematic JSON string is:\n" + e.doc
+            self.perror(error_message)
             sys.exit()
         except Exception as e:
             self.perror(f'Could not start BusyBee: {e}')
