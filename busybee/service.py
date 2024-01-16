@@ -58,6 +58,7 @@ class BusyBee:
         def fetch_content(path_or_url):
             # Check if the input is likely a URL
             if path_or_url.startswith(("http://", "https://")):
+                self.term_messages.send(f'Getting install.json from {path_or_url}')
                 try:
                     response = requests.get(path_or_url)
                     response.raise_for_status()
