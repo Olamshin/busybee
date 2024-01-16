@@ -1,5 +1,6 @@
 from argparse import Namespace
 import cmd2
+import os
 import sys
 from blinker import signal
 from .service import BusyBee
@@ -26,7 +27,7 @@ class BusyBeeCli(cmd2.Cmd):
             self.busybee = BusyBee()
         except MissingConfigurationException as e:
             self.perror(f'Could not start BusyBee: {e}')
-            config_path = gen_config()
+            config_path = os.path.normpath(os.path.abspath(gen_config()))
             self.poutput(f'Update configuration file generated at {config_path}')
             sys.exit()
         except Exception as e:

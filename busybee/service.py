@@ -39,9 +39,10 @@ class BusyBee:
         config_file_path = find_config_file(CONFIG_LOCATIONS)
 
         if config_file_path is None:
-            pretty_list = "\n ".join(str(item) for item in CONFIG_LOCATIONS)
+            pretty_list = "\n ".join(
+                str(os.path.normpath(os.path.abspath(item))) for item in CONFIG_LOCATIONS)
             raise MissingConfigurationException(
-                f"config file does exist at any of these locations:\n {pretty_list}"
+                f"config file does not exist at any of these locations:\n {pretty_list}"
             )
 
         p = Path(config_file_path)
