@@ -43,6 +43,7 @@ be-modules: # list the FOLIO backend modules you would like to spin up
     - mod-circulation
     - mod-password-validator
     - mod-login-saml
+    - mod-copycat
 ui-modules:
   - folio_users
   - folio_data-import
