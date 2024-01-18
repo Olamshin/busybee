@@ -1,4 +1,4 @@
-from .cli import BusyBeeCli
+from busybee.cli import BusyBeeCli
 import sys
 
 if __name__ == "__main__":
