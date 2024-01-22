@@ -12,6 +12,12 @@ env-vars: # any key-pairs added here will be added to the OKAPI env service
   KAFKA_PORT: 9092
   ELASTICSEARCH_URL: http://host.docker.internal:9200
   SYSTEM_USER_PASSWORD: system_user_password
+  AWS_URL: http://host.docker.internal:9000
+  AWS_REGION: us-east-1
+  AWS_BUCKET: example-bucket
+  AWS_ACCESS_KEY_ID: minioadmin
+  AWS_SECRET_ACCESS_KEY: minioadmin
+  SPLIT_FILES_ENABLED: true
 be-modules: # list the FOLIO backend modules you would like to spin up
     ## CORE: ensure that core FOLIO modules are first on this list
     - mod-permissions
