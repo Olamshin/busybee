@@ -1,15 +1,15 @@
 okapi-url: http://localhost:9130
 registry-url: http://folio-registry.aws.indexdata.com
-install-json-path: /file/path/to/platform-complete/install.json # web url like https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json can also be set
+install-json-path: https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json  # A file path to install.json can also be used
 env-vars: # any key-pairs added here will be added to the OKAPI env service
   DB_PASSWORD: folio_admin
   DB_USERNAME: folio_admin
   DB_DATABASE: okapi_modules
   DB_HOST: host.docker.internal
-  DB_PORT: '5432'
+  DB_PORT: 5432
   OKAPI_URL: http://host.docker.internal:9130
   KAFKA_HOST: host.docker.internal
-  KAFKA_PORT: '9092'
+  KAFKA_PORT: 9092
   ELASTICSEARCH_URL: http://host.docker.internal:9200
   SYSTEM_USER_PASSWORD: system_user_password
 be-modules: # list the FOLIO backend modules you would like to spin up
