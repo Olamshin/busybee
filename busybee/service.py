@@ -29,7 +29,7 @@ class BusyBee:
         "email": "admin@example.org",
         "perms_users_assign": "yes",
     }
-    instId = "busybee-redirect"
+    instIdTemplate = "busybee-redirect::{}"
     okapi_url = ""
 
     def __init__(self, *args, **kwargs):
@@ -508,7 +508,7 @@ class BusyBee:
         if module_name in self._mod_descriptors.keys():
             module = self._mod_descriptors[module_name]
             del_resp = requests.delete(
-                f"{self.okapi_url}/_/discovery/modules/{module['id']}/{self.instId}",
+                f"{self.okapi_url}/_/discovery/modules/{module['id']}/{self.instIdTemplate.format(module_name)}",
                 headers={
                     "X-Okapi-Tenant": "supertenant",
                     "Content-type": "application/json",
@@ -536,7 +536,7 @@ class BusyBee:
                     "Content-type": "application/json",
                     "Accept": "text/plain",
                 },
-                json={"srvcId": module["id"], "instId": self.instId, "url": http_location},
+                json={"srvcId": module["id"], "instId": self.instIdTemplate.format(module_name), "url": http_location},
             )
             if post_resp.status_code != 201:
                 self.error_msg.send(f"module could not be redirected: {post_resp.text}")
