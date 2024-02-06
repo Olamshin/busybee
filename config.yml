@@ -41,6 +41,7 @@ be-modules: # list the FOLIO backend modules you would like to spin up
   - mod-invoice-storage
   - mod-orders
   - mod-orders-storage
+  - mod-audit
   - mod-pubsub
   - mod-tags
   - mod-finance
