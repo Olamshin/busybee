@@ -113,3 +113,6 @@ class BusyBeeCli(cmd2.Cmd):
         if http_location is not None:
             self.busybee.remove_redirect(module_name=module_name)
             self.busybee.add_redirect(module_name=module_name, http_location=http_location)
+
+    def do_reload(self: "BusyBeeCli", args: Namespace):
+        self.busybee.reload()

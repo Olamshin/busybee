@@ -35,6 +35,12 @@ class BusyBee:
     def __init__(self, *args, **kwargs):
         self.term_messages = signal("output")
         self.error_msg = signal("errors")
+        
+        self.__load_config()
+        self.__load_mod_descriptors(False)
+        self.okapi_url = self._config["okapi-url"]
+
+    def __load_config(self):
         # Find the configuration file
         config_file_path = find_config_file(CONFIG_LOCATIONS)
 
@@ -51,10 +57,7 @@ class BusyBee:
             config: dict[str, Any] = yaml.safe_load(f)
         self._config = config
 
-        self.__load_mod_descriptors(config, False)
-        self.okapi_url = self._config["okapi-url"]
-
-    def __load_mod_descriptors(self, config, force):
+    def __load_mod_descriptors(self, force):
         def fetch_content(path_or_url):
             # Check if the input is likely a URL
             if path_or_url.startswith(("http://", "https://")):
@@ -73,7 +76,7 @@ class BusyBee:
             except IOError as e:
                 return f"Error reading file: {e}"
             
-        
+        config = self._config
         if not "install-json-path" in config:
             raise Exception("install-json-path is not present")
 
@@ -86,7 +89,7 @@ class BusyBee:
                 be_modules = config["be-modules"]
                 ui_modules = config["ui-modules"]
                 if set(be_modules).issubset(set(self._mod_descriptors.keys())) and set(ui_modules).issubset(set(self._mod_descriptors.keys())):
-                    self.term_messages.send(f'Using existing module descriptor cache at [{mod_desc_cache_path}]\nDelete this file & restart BusyBee to recreate a fresh cache!')
+                    self.term_messages.send(f'Using existing module descriptor cache at [{mod_desc_cache_path}]\nRun the "reload" command to recreate cache and reload config file')
                     return
 
         install_json_content = fetch_content(config["install-json-path"])
@@ -119,6 +122,10 @@ class BusyBee:
         with open(mod_desc_cache_path, "w") as json_file:
             json.dump(self._mod_descriptors, json_file)
         self.term_messages.send(f'Module descriptor cache created at {mod_desc_cache_path}')
+
+    def reload(self):
+        self.__load_config()
+        self.__load_mod_descriptors(True)
 
     def set_module_env_vars(self):
         print("###############")
@@ -277,7 +284,7 @@ class BusyBee:
     def create_tenant_admin(self):
         tenant_id = self.tenant["id"]
         admin_user = self.admin_user
-        print("############## #")
+        print("###############")
         print("CREATING TENANT ADMIN USER")
         print("###############")
 

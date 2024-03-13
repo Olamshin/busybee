@@ -27,12 +27,12 @@ Upon first run, if the configuration is missing, BusyBee CLI will generate a tem
 
 # Available Commands
 - start: Initializes the environment and creates a tenant with enabled modules.
-- deploy: Deploys a specified module.
-Usage: `deploy -m MODULE_NAME`
-- undeploy: Undeploys a specified module.
-Usage: `undeploy -m MODULE_NAME`
-- redirect: Manages HTTP redirects for a module.
-Usage: `redirect -m MODULE_NAME [-l LOCATION | -rm]`
+- deploy: Deploys a specified module. Usage: `deploy -m MODULE_NAME`
+- undeploy: Undeploys a specified module. Usage: `undeploy -m MODULE_NAME`
+- redirect: Manages HTTP redirects for a module. Usage: `redirect -m MODULE_NAME [-l LOCATION | -rm]`
+> MODULE_NAME should be present in the BusyBee configuration file. 
+- reload: Reloads the config file and rebuilds the mod descriptors cache
+Usage: `reload`
 
-MODULE_NAME should be present in the BusyBee configuration file. 
+
 
