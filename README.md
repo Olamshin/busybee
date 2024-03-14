@@ -33,6 +33,11 @@ Upon first run, if the configuration is missing, BusyBee CLI will generate a tem
 > MODULE_NAME should be present in the BusyBee configuration file. 
 - reload: Reloads the config file and rebuilds the mod descriptors cache
 Usage: `reload`
+- create_tenant: Create a new tenant with modules in BusyBee configuration file. Usage: `create_tenant -id TENANT_ID [-n TENANT_NAME] [-d TENANT_DESCRIPTION] [-i INCLUDED_MODULES | -e EXCLUDED_MODULES]`
+>Example: `create_tenant -id test1 -e mod-copycat,mod-login-saml`
+- delete_tenant: Deletes a tenant. Usage: `delete_tenant -id TENANT_ID`
+- help: Show available commands
+- quit: Exit the application
 
 
 

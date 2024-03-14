@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 from pathlib import Path
 import yaml
 import os
@@ -35,7 +35,7 @@ class BusyBee:
     def __init__(self, *args, **kwargs):
         self.term_messages = signal("output")
         self.error_msg = signal("errors")
-        
+
         self.__load_config()
         self.__load_mod_descriptors(False)
         self.okapi_url = self._config["okapi-url"]
@@ -75,7 +75,7 @@ class BusyBee:
                     return file.read()
             except IOError as e:
                 return f"Error reading file: {e}"
-            
+
         config = self._config
         if not "install-json-path" in config:
             raise Exception("install-json-path is not present")
@@ -175,19 +175,19 @@ class BusyBee:
 
         pass
 
-    def create_tenant(self):
+    def create_tenant(self, tenant_id="", tenant_name="", tenant_desc=""):
         print("###############")
         print("CREATING TENANT")
         print("###############")
-
-        tenant_id = self.tenant["id"]
-        tenant_name = self.tenant["name"]
-        tenant_desc = self.tenant["description"]
+        if not tenant_id:
+            tenant_id = self.tenant["id"]
+            tenant_name = self.tenant["name"]
+            tenant_desc = self.tenant["description"]
 
         # check tenant
         resp = requests.get(f"{self.okapi_url}/_/proxy/tenants/{tenant_id}")
         if resp.status_code == 200:
-            print(f"tenant {tenant_id} already exists")
+            self.error_msg.send(f"tenant({tenant_id}) already exists")
             return
 
         # create tenant
@@ -197,7 +197,8 @@ class BusyBee:
             headers={"X-Okapi-Tenant": "supertenant"},
         )
         if resp.status_code != 201:
-            raise Exception(f"could not create tenant:{resp.text}")
+            self.error_msg.send(f"could not create tenant({resp.text})")
+            return
 
         # enable okapi for tenant
         resp = requests.post(
@@ -206,13 +207,27 @@ class BusyBee:
             headers={"X-Okapi-Tenant": "supertenant"},
         )
         if resp.status_code != 201:
-            raise Exception(f"could not enable okapi for tenant:{resp.text}")
+            self.error_msg.send(f"could not enable okapi for tenant:{resp.text}")
+            return
+        
+        self.term_messages.send(f"tenant({tenant_id}) has been created")
 
-    def enable_modules_for_tenant(self):
+    def enable_modules_for_tenant(self, tenant_id: str = None, include_modules: List = [], exclude_modules: List = []):
         modules = self._mod_descriptors.values()
-        tenant_id = self.tenant["id"]
-        be_modules = self._config["be-modules"]
-        ui_modules = self._config["ui-modules"]
+        if not tenant_id:
+            tenant_id = self.tenant["id"]
+        be_modules: List[str] = self._config["be-modules"]
+        ui_modules: List[str] = self._config["ui-modules"]
+
+        if exclude_modules:
+            # remove excluded modules
+            be_modules = [module for module in be_modules if module.strip() not in exclude_modules]
+            ui_modules = [module for module in ui_modules if module.strip() not in exclude_modules]
+
+        if include_modules:
+            # include modules only
+            be_modules = [module for module in be_modules if module.strip() in include_modules]
+            ui_modules = [module for module in ui_modules if module.strip() in include_modules]
 
         def enable_be_module(module):
             module_id = module["id"]
@@ -281,9 +296,35 @@ class BusyBee:
             module = self._mod_descriptors[item]
             enable_ui_module(module)
 
-    def create_tenant_admin(self):
-        tenant_id = self.tenant["id"]
+    def delete_tenant(self, tenant_id: str):
+        print("###############")
+        print("DELETING TENANT")
+        print("###############")
+
+        # check tenant
+        resp = requests.get(f"{self.okapi_url}/_/proxy/tenants/{tenant_id}")
+        if resp.status_code != 200:
+            self.error_msg.send(f"tenant({tenant_id}) does not exists")
+            return
+        
+        # delete tenant
+        resp = requests.delete(
+            f"{self.okapi_url}/_/proxy/tenants/{tenant_id}",
+            headers={"X-Okapi-Tenant": "supertenant"},
+        )
+        if resp.status_code != 204:
+            self.error_msg.send(f"could not create tenant:{resp.text}")
+            return
+        
+        self.term_messages.send(f"tenant({tenant_id}) has been deleted")
+
+    def create_tenant_admin(self, tenant_id: str = None):
         admin_user = self.admin_user
+        if tenant_id:
+            admin_user['username'] = tenant_id + '_admin'
+        else:
+            tenant_id = self.tenant["id"]
+        
         print("###############")
         print("CREATING TENANT ADMIN USER")
         print("###############")
