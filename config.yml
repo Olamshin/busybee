@@ -22,6 +22,7 @@ env-vars: # any key-pairs added here will be added to the OKAPI env service
   S3_REGION: us-east-1                                                                                                                                                                                                                                                                                                                                   
   S3_ACCESS_KEY_ID: minioadmin                                                                                                                                                                  
   S3_SECRET_ACCESS_KEY: minioadmin
+  S3_BUCKET: example-bucket
   SPLIT_FILES_ENABLED: true
 be-modules: # list the FOLIO backend modules you would like to spin up
   ## CORE: ensure that core FOLIO modules are first on this list
