@@ -1,5 +1,5 @@
 okapi-url: http://localhost:9130
-registry-url: http://folio-registry.aws.indexdata.com
+registry-url: http://folio-registry.dev.folio.org
 install-json-path: https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json  # A file path to install.json can also be used
 env-vars: # any key-pairs added here will be added to the OKAPI env service
   DB_PASSWORD: folio_admin
