@@ -7,12 +7,12 @@ from blinker import signal
 from .service import BusyBee
 from .config import gen_config, MissingConfigurationException
 
+
 class BusyBeeCli(cmd2.Cmd):
     _instance = None
     CMD_ENV_OPS = "Environment Operations"
     CMD_TENANT_OPS = "Tenant Operations"
     CMD_MODULE_OPS = "Module Operations"
-
 
     def __new__(cls):
         if cls._instance is None:
@@ -88,6 +88,7 @@ class BusyBeeCli(cmd2.Cmd):
         help="name of the module",
         choices_provider=module_name_choice_provider,
     )
+
     @cmd2.with_argparser(undeploy_argparser)  # type: ignore
     @cmd2.with_category(CMD_MODULE_OPS)
     def do_undeploy(self: 'BusyBeeCli', args: Namespace):
@@ -107,6 +108,7 @@ class BusyBeeCli(cmd2.Cmd):
     group = redirect_argparser.add_mutually_exclusive_group(required=True)
     group.add_argument("-l", "--location", type=str, help="HTTP location for module")
     group.add_argument("-rm", "--remove", action="store_true", help="Remove redirect")
+
     @cmd2.with_argparser(redirect_argparser)  # type: ignore
     @cmd2.with_category(CMD_ENV_OPS)
     def do_redirect(self: "BusyBeeCli", args: Namespace):
@@ -164,6 +166,7 @@ class BusyBeeCli(cmd2.Cmd):
         required=False,
         help="comma separated list of modules to disable in the tenant",
     )
+
     @cmd2.with_argparser(create_tenant_argparser)  # type: ignore
     @cmd2.with_category(CMD_TENANT_OPS)
     def do_create_tenant(self: "BusyBeeCli", args: Namespace):
@@ -186,6 +189,7 @@ class BusyBeeCli(cmd2.Cmd):
         required=True,
         help="id of the tenant",
     )
+
     @cmd2.with_argparser(delete_tenant_argparser)
     @cmd2.with_category(CMD_TENANT_OPS)
     def do_delete_tenant(self: 'BusyBeeCli', args: Namespace):
