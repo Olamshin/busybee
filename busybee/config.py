@@ -9,11 +9,11 @@ CONFIG_LOCATIONS = [
     os.path.normpath(os.path.join(".", DIRECTORY_NAME)),
 ]
 
-
 class MissingConfigurationException(Exception):
     def __init__(self, message="Configuration parameter is missing"):
         self.message = message
         super().__init__(self.message)
+
 
 
 def find_config_file(possible_locations):
@@ -22,12 +22,11 @@ def find_config_file(possible_locations):
             return location
     return None
 
-
 def resource_path(relative_path):
     """Get absolute path to resource, works for dev and for PyInstaller"""
     try:
         # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS  # type: ignore
+        base_path = sys._MEIPASS # type: ignore
     except Exception:
         base_path = os.path.abspath(".")
 

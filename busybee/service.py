@@ -88,10 +88,8 @@ class BusyBee:
                 self._mod_descriptors = json.load(json_file)
                 be_modules = config["be-modules"]
                 ui_modules = config["ui-modules"]
-                if set(be_modules).issubset(set(self._mod_descriptors.keys())) and set(ui_modules).issubset(
-                        set(self._mod_descriptors.keys())):
-                    self.term_messages.send(
-                        f'Using existing module descriptor cache at [{mod_desc_cache_path}]\nRun the "reload" command to recreate cache and reload config file')
+                if set(be_modules).issubset(set(self._mod_descriptors.keys())) and set(ui_modules).issubset(set(self._mod_descriptors.keys())):
+                    self.term_messages.send(f'Using existing module descriptor cache at [{mod_desc_cache_path}]\nRun the "reload" command to recreate cache and reload config file')
                     return
 
         install_json_content = fetch_content(config["install-json-path"])
@@ -104,7 +102,7 @@ class BusyBee:
             if match is not None:
                 module_name = match.group(1)
             if (not module_name in self._config["be-modules"]) and (
-                    not module_name in self._config["ui-modules"]
+                not module_name in self._config["ui-modules"]
             ):
                 continue
 
@@ -183,7 +181,7 @@ class BusyBee:
                     },
                 )
                 if (not reg_resp.status_code == 200) and (
-                        not reg_resp.status_code == 201
+                    not reg_resp.status_code == 201
                 ):
                     raise Exception(f"could not register module: {reg_resp.text}")
             else:
@@ -269,9 +267,9 @@ class BusyBee:
                 headers={"X-Okapi-Tenant": "supertenant"},
             )
             if (
-                    resp.status_code != 201
-                    and resp.status_code != 200
-                    and "has no launchDescriptor" not in resp.text
+                resp.status_code != 201
+                and resp.status_code != 200
+                and "has no launchDescriptor" not in resp.text
             ):
                 raise Exception(
                     f"could not create enable module({module_id}) for tenant({tenant_id}): {resp.text}"
@@ -369,7 +367,7 @@ class BusyBee:
                 )
                 resp_json = resp.json()
                 if resp.status_code == 404 or (
-                        resp_json == [] and resp.status_code == 200
+                    resp_json == [] and resp.status_code == 200
                 ):
                     raise Exception(
                         f"authtoken module is not registered here:{resp.text}"

@@ -1,7 +1,12 @@
 install-json-path: https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json
 # Example local reference for linux: /home/user/projects/folio/busybee/platform-complete/install.json
 additional-json-path: C:\Users\User\.busybee\additional_modules.json # Optional Read "How to run consortia" section in Busybee Tips Tricks
-# Copy required modules in your .busybee/config.yml file
+# A file path to your additional json file that can be used to deploy additional modules not usually included in install.json
+# Example additional_modules.json:
+#   [ { "id" : "mod-consortia-1.2.0-SNAPSHOT", "action" : "enable" } ]
+# additional-json-path: /home/user/.busybee/additional_modules.json (linux)
+
+## Copy modules in your .busybee/config.yml file
 be-modules: # list the FOLIO backend modules you would like to spin up. Use CORE and END CORE modules for fast setup
   ## CORE: ensure that core FOLIO modules are first on this list
   - mod-permissions
