@@ -94,6 +94,25 @@ class BusyBee:
 
         install_json_content = fetch_content(config["install-json-path"])
         self._install_json = json.loads(install_json_content)
+        
+        # Check for optional additional modules
+        if "additional-json-path" in config: 
+            additional_json_path = config["additional-json-path"]
+            
+            if os.path.exists(additional_json_path):
+                print(f"Found additional modules from json path {additional_json_path}")
+                additional_json_content = fetch_content(additional_json_path)
+                additional_install_json = json.loads(additional_json_content)
+                additional_install_json_len = len(additional_install_json)
+                
+                if additional_install_json_len > 0:
+                    additional_json_dump = json.dumps(additional_install_json, indent=4)
+                    print(f'Preparing to append additional modules: {additional_json_dump}')
+                    self._install_json += additional_install_json
+                    print(f"Appended {additional_install_json_len} additional modules to the list")
+                else:
+                    print(f"Failed to append additional modules, the list is empty")
+        
         registry_url = config["registry-url"]
         for module in self._install_json:
             module_id = module["id"]

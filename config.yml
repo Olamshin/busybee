@@ -1,6 +1,10 @@
 okapi-url: http://localhost:9130
 registry-url: http://folio-registry.dev.folio.org
 install-json-path: https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json  # A file path to install.json can also be used
+# A file path to your additional json file that can be used to deploy additional modules not usually included in install.json
+# Example additional_modules.json: 
+#   [ { "id" : "mod-consortia-1.2.0-SNAPSHOT", "action" : "enable" } ]
+# additional-json-path: /home/user/.busybee/additional_modules.json 
 env-vars: # any key-pairs added here will be added to the OKAPI env service
   DB_PASSWORD: folio_admin
   DB_USERNAME: folio_admin
