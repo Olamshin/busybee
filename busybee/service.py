@@ -149,9 +149,23 @@ class BusyBee:
         print("REGISTERING MODULES")
         print("###############")
         modules = self._mod_descriptors
+
         for module in modules.values():
             module_id = module["id"]
             module_descriptor = module["desc"]
+            if "mod-consortia" in modules and "mod-authtoken" in module_id:
+                env_vars = module_descriptor["launchDescriptor"]["env"]
+                for env_var in env_vars:
+                    if env_var["name"] == "JAVA_OPTIONS":
+                        env_var["value"] += " -Dallow.cross.tenant.requests=true"
+
+            if "mod-consortia" in module_id:
+                env_vars = module_descriptor["launchDescriptor"]["env"]
+                system_user_password_env = {"name": "SYSTEM_USER_PASSWORD", "value": "consortia-system-user"}
+                system_user_username_env = {"name": "SYSTEM_USER_NAME", "value": "consortia-system-user"}
+                env_vars.append(system_user_password_env)
+                env_vars.append(system_user_username_env)
+
             # check if module is already registered
             resp = requests.get(f"{self.okapi_url}/_/proxy/modules/{module_id}")
             # if module is not registered, register it
@@ -209,7 +223,7 @@ class BusyBee:
         if resp.status_code != 201:
             self.error_msg.send(f"could not enable okapi for tenant:{resp.text}")
             return
-        
+
         self.term_messages.send(f"tenant({tenant_id}) has been created")
 
     def enable_modules_for_tenant(self, tenant_id: str = None, include_modules: List = [], exclude_modules: List = []):
@@ -306,7 +320,7 @@ class BusyBee:
         if resp.status_code != 200:
             self.error_msg.send(f"tenant({tenant_id}) does not exists")
             return
-        
+
         # delete tenant
         resp = requests.delete(
             f"{self.okapi_url}/_/proxy/tenants/{tenant_id}",
@@ -315,7 +329,7 @@ class BusyBee:
         if resp.status_code != 204:
             self.error_msg.send(f"could not create tenant:{resp.text}")
             return
-        
+
         self.term_messages.send(f"tenant({tenant_id}) has been deleted")
 
     def create_tenant_admin(self, tenant_id: str = None):
@@ -324,7 +338,7 @@ class BusyBee:
             admin_user['username'] = tenant_id + '_admin'
         else:
             tenant_id = self.tenant["id"]
-        
+
         print("###############")
         print("CREATING TENANT ADMIN USER")
         print("###############")
