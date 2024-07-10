@@ -4,7 +4,7 @@ blinker==1.8.2
 certifi==2024.7.4
 charset-normalizer==3.3.2
 cmd2==2.4.3
-gnureadline==8.2.10
+gnureadline==8.2.10; sys_platform == 'linux' or sys_platform == 'darwin'
 idna==3.7
 jmespath==1.0.1
 macholib==1.16.3
