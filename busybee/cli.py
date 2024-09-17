@@ -34,7 +34,7 @@ class BusyBeeCli(cmd2.Cmd):
             self.perror(f'Could not init BusyBee, missing configuration exception: {e}')
             config_path = os.path.normpath(os.path.abspath(gen_config()))
             self.poutput(f'Update configuration file generated at {config_path}')
-            sys.exit(2)
+            sys.exit(1)
         except JSONDecodeError as e:
             error_message = "A JSONDecodeError occurred: " + str(e)
             error_message += "\nThe problematic JSON string is:\n" + e.doc
@@ -42,7 +42,7 @@ class BusyBeeCli(cmd2.Cmd):
             sys.exit()
         except Exception as e:
             self.perror(f'Could not init BusyBee, exception: {e}')
-            sys.exit(2)
+            sys.exit(1)
 
         self.poutput("Ready for your commands!")
 
@@ -64,7 +64,7 @@ class BusyBeeCli(cmd2.Cmd):
             self.busybee.create_tenant_admin()
         except Exception as e:
             self.perror(f'Could not start BusyBee, exception: {e}')
-            sys.exit(2)  
+            sys.exit(1)  
 
     deploy_argparser = cmd2.Cmd2ArgumentParser()
     deploy_argparser.add_argument(
