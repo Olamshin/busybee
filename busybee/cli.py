@@ -31,18 +31,18 @@ class BusyBeeCli(cmd2.Cmd):
         try:
             self.busybee = BusyBee()
         except MissingConfigurationException as e:
-            self.perror(f'Could not start BusyBee: {e}')
+            self.perror(f'Could not init BusyBee, missing configuration exception: {e}')
             config_path = os.path.normpath(os.path.abspath(gen_config()))
             self.poutput(f'Update configuration file generated at {config_path}')
-            sys.exit()
+            sys.exit(2)
         except JSONDecodeError as e:
             error_message = "A JSONDecodeError occurred: " + str(e)
             error_message += "\nThe problematic JSON string is:\n" + e.doc
             self.perror(error_message)
             sys.exit()
         except Exception as e:
-            self.perror(f'Could not start BusyBee: {e}')
-            sys.exit()
+            self.perror(f'Could not init BusyBee, exception: {e}')
+            sys.exit(2)
 
         self.poutput("Ready for your commands!")
 
@@ -56,11 +56,15 @@ class BusyBeeCli(cmd2.Cmd):
     @cmd2.with_category(CMD_ENV_OPS)
     def do_start(self, arg):
         """Initializes the environment and creates a tenant with enabled modules"""
-        self.busybee.set_module_env_vars()
-        self.busybee.register_modules()
-        self.busybee.create_tenant()
-        self.busybee.enable_modules_for_tenant()
-        self.busybee.create_tenant_admin()
+        try:
+            self.busybee.set_module_env_vars()
+            self.busybee.register_modules()
+            self.busybee.create_tenant()
+            self.busybee.enable_modules_for_tenant()
+            self.busybee.create_tenant_admin()
+        except Exception as e:
+            self.perror(f'Could not start BusyBee, exception: {e}')
+            sys.exit(2)  
 
     deploy_argparser = cmd2.Cmd2ArgumentParser()
     deploy_argparser.add_argument(
