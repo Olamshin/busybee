@@ -1,19 +1,19 @@
 altgraph==0.17.4
-attrs==23.2.0
+attrs>=23.1.0
 blinker==1.8.2
 certifi==2024.7.4
 charset-normalizer==3.3.2
 cmd2==2.4.3
-gnureadline==8.2.10; sys_platform == 'linux' or sys_platform == 'darwin'
+gnureadline>=8.2.13; sys_platform == 'linux' or sys_platform == 'darwin'
 idna==3.7
 jmespath==1.0.1
 macholib==1.16.3
 packaging==24.1
-pyinstaller==6.9.0
-pyinstaller-hooks-contrib==2024.7
-pyperclip==1.9.0
-PyYAML==6.0.1
-requests==2.32.3
-setuptools==70.2.0
-urllib3==2.2.2
+pyinstaller>=6,<7  # Keep PyInstaller in the compatible range
+pyinstaller-hooks-contrib>=2024.9,<2025  # Ensure compatibility with PyInstaller 6.x
+pyperclip>=1.8
+PyYAML>=6.0
+requests>=2,<3
+setuptools>=70,<75  # Ensure compatibility with Python 3.x versions
+urllib3>=2,<3
 wcwidth==0.2.13
