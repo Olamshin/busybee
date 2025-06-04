@@ -173,7 +173,7 @@ class BusyBee:
             module_id = module["id"]
             module_descriptor = module["desc"]
             if "launchDescriptor" in module_descriptor:
-                module_descriptor["launchDescriptor"]["dockerArgs"]["HostConfig"]["Memory"] = 1073741824  # 1 GB in bytes default for all
+                module_descriptor["launchDescriptor"]["dockerArgs"]["HostConfig"]["Memory"] = 786432000
             if "mod-consortia" in modules and "mod-authtoken" in module_id:
                 env_vars = module_descriptor["launchDescriptor"]["env"]
                 for env_var in env_vars:
