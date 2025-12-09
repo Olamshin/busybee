@@ -1,0 +1,99 @@
+okapi-url: http://localhost:9130
+registry-url: http://folio-registry.dev.folio.org
+install-json-path: https://raw.githubusercontent.com/folio-org/platform-complete/snapshot/install.json  # A file path to install.json can also be used
+# A file path to your additional json file that can be used to deploy additional modules not usually included in install.json
+# Example additional_modules.json: 
+#   [ { "id" : "mod-consortia-1.2.0-SNAPSHOT", "action" : "enable" } ]
+# additional-json-path: /home/user/.busybee/additional_modules.json 
+env-vars: # any key-pairs added here will be added to the OKAPI env service
+  DB_PASSWORD: folio_admin
+  DB_USERNAME: folio_admin
+  DB_DATABASE: okapi_modules
+  DB_HOST: host.docker.internal
+  DB_PORT: 5432
+  OKAPI_URL: http://host.docker.internal:9130
+  KAFKA_HOST: host.docker.internal
+  KAFKA_PORT: 9092
+  ELASTICSEARCH_URL: http://host.docker.internal:9200
+  SYSTEM_USER_PASSWORD: system_user_password
+  AWS_URL: http://host.docker.internal:9000
+  AWS_REGION: us-east-1
+  AWS_BUCKET: example-bucket
+  AWS_ACCESS_KEY_ID: minioadmin
+  AWS_SECRET_ACCESS_KEY: minioadmin
+  S3_IS_AWS: false
+  S3_URL: http://host.docker.internal:9000                                                                                                                                                                       
+  S3_REGION: us-east-1                                                                                                                                                                                                                                                                                                                                   
+  S3_ACCESS_KEY_ID: minioadmin                                                                                                                                                                  
+  S3_SECRET_ACCESS_KEY: minioadmin
+  S3_BUCKET: example-bucket
+  SPLIT_FILES_ENABLED: true
+be-modules: # list the FOLIO backend modules you would like to spin up
+  ## CORE: ensure that core FOLIO modules are first on this list
+  - mod-permissions
+  - mod-configuration
+  - mod-login
+  - mod-users
+  - mod-users-bl
+  - mod-authtoken
+  ## END CORE
+  - mod-data-import
+  - mod-di-converter-storage
+  - mod-source-record-manager
+  - mod-source-record-storage
+  - mod-inventory
+  - mod-inventory-storage
+  - mod-organizations
+  - mod-organizations-storage
+  - mod-entities-links
+  - mod-data-export
+  - mod-invoice
+  - mod-invoice-storage
+  - mod-orders
+  - mod-orders-storage
+  - mod-pubsub
+  - mod-tags
+  - mod-finance
+  - mod-finance-storage
+  - mod-circulation-storage
+  - mod-circulation
+  - mod-password-validator
+  - mod-login-saml
+  - mod-copycat
+ui-modules:
+  - folio_users
+  - folio_data-import
+  - folio_tenant-settings
+  - folio_organizations
+  - folio_inventory
+  - folio_invoice
+  - folio_orders
+  - folio_finance
+
+# Module descriptor transformations applied before posting to Okapi
+module-transformations:
+  # Global defaults applied to ALL modules with launchDescriptor
+  defaults:
+    docker-args:
+      HostConfig:
+        Memory: 1073741824  # 1 GB in bytes
+
+  # Per-module transformations (applied after defaults)
+  modules:
+    mod-consortia:
+      env:
+        - name: SYSTEM_USER_PASSWORD
+          value: consortia-system-user
+          action: add
+        - name: SYSTEM_USER_NAME
+          value: consortia-system-user
+          action: add
+
+    mod-authtoken:
+      env:
+        - name: JAVA_OPTIONS
+          value: " -Dallow.cross.tenant.requests=true"
+          action: append
+      when:
+        modules-present:
+          - mod-consortia

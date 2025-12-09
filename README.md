@@ -1,43 +1,59 @@
-# Overview
+# BusyBee
 
-BusyBee is a command-line interface application designed to manage and deploy FOLIO modules in a dynamic and efficient manner. Built on Python and utilizing the cmd2 library, BusyBee offers a range of commands for deploying, undeploying, and managing redirects for different modules.
+CLI tool for managing and deploying FOLIO modules to Okapi.
 
-# Features
-- Module Descriptors Caching: Caches module descriptors to improve performance and efficiency.
-- Tenant and User Management: Supports creating tenants and tenant admin users, including setting permissions and environment variables.
-- Module Deployment and Management: Facilitates deploying, undeploying, and managing modules, including HTTP redirection.
-- Autocompletion of commands and module names on the CLI.
-
-# Usage 
-```
+## Quick Start
+```bash
 pip install -r requirements.txt
 python -m busybee
 ```
 
-# Build Executable From Source
-
-To build executable from source, clone the repository and install the required dependencies:
+## Build Executable
+```bash
+python build.py  # Output in dist/
 ```
-python build.py
+
+## Configuration
+
+Config file location: `~/.busybee/config.yml`
+
+### Module Descriptor Transformations
+
+Transform module descriptors before posting to Okapi:
+
+```yaml
+module-transformations:
+  defaults:
+    docker-args:
+      HostConfig:
+        Memory: 1073741824  # 1 GB default
+
+  modules:
+    mod-source-record-manager:
+      docker-args:
+        HostConfig:
+          Memory: 2147483648  # 2 GB
+          Binds:
+            action: append
+            values:
+              - "/host/path:/container/path:rw"
+      env:
+        - name: MY_VAR
+          value: my_value
+          action: set  # set (default), add, or append
+      when:
+        modules-present: [mod-pubsub]  # conditional
 ```
-Executable will be located in the `dist` folder.
 
-# Configuration
-Upon first run, if the configuration is missing, BusyBee CLI will generate a template configuration file at a specified path. Update this file with the necessary details before proceeding.
+## Commands
 
-# Available Commands
-- start: Initializes the environment and creates a tenant with enabled modules.
-- deploy: Deploys a specified module. Usage: `deploy -m MODULE_NAME`
-- undeploy: Undeploys a specified module. Usage: `undeploy -m MODULE_NAME`
-- redirect: Manages HTTP redirects for a module. Usage: `redirect -m MODULE_NAME [-l LOCATION | -rm]`
-> MODULE_NAME should be present in the BusyBee configuration file. 
-- reload: Reloads the config file and rebuilds the mod descriptors cache
-Usage: `reload`
-- create_tenant: Create a new tenant with modules in BusyBee configuration file. Usage: `create_tenant -id TENANT_ID [-n TENANT_NAME] [-d TENANT_DESCRIPTION] [-i INCLUDED_MODULES | -e EXCLUDED_MODULES]`
->Example: `create_tenant -id test1 -e mod-copycat,mod-login-saml`
-- delete_tenant: Deletes a tenant. Usage: `delete_tenant -id TENANT_ID`
-- help: Show available commands
-- quit: Exit the application
-
-
-
+| Command | Description |
+|---------|-------------|
+| `start` | Initialize environment and create tenant with modules |
+| `deploy -m MODULE` | Deploy a module |
+| `undeploy -m MODULE` | Undeploy a module |
+| `redirect -m MODULE -l URL` | Redirect module to URL |
+| `redirect -m MODULE -rm` | Remove redirect |
+| `reload` | Reload config and rebuild descriptor cache |
+| `create_tenant -id ID [-e EXCLUDED]` | Create tenant |
+| `delete_tenant -id ID` | Delete tenant |

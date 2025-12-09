@@ -62,3 +62,31 @@ ui-modules:
   ## Other modules (Optional)
   - folio_acquisition-units
   - folio_developer
+
+# Module descriptor transformations applied before posting to Okapi
+module-transformations:
+  # Global defaults applied to ALL modules with launchDescriptor
+  defaults:
+    docker-args:
+      HostConfig:
+        Memory: 1073741824  # 1 GB in bytes
+
+  # Per-module transformations (applied after defaults)
+  modules:
+    mod-consortia:
+      env:
+        - name: SYSTEM_USER_PASSWORD
+          value: consortia-system-user
+          action: add
+        - name: SYSTEM_USER_NAME
+          value: consortia-system-user
+          action: add
+
+    mod-authtoken:
+      env:
+        - name: JAVA_OPTIONS
+          value: " -Dallow.cross.tenant.requests=true"
+          action: append
+      when:
+        modules-present:
+          - mod-consortia

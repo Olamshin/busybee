@@ -69,3 +69,46 @@ ui-modules:
   - folio_invoice
   - folio_orders
   - folio_finance
+
+# Module descriptor transformations applied before posting to Okapi
+module-transformations:
+  # Global defaults applied to ALL modules with launchDescriptor
+  defaults:
+    docker-args:
+      HostConfig:
+        Memory: 1073741824  # 1 GB in bytes
+
+  # Per-module transformations (applied after defaults)
+  modules:
+    mod-consortia:
+      env:
+        - name: SYSTEM_USER_PASSWORD
+          value: consortia-system-user
+          action: add
+        - name: SYSTEM_USER_NAME
+          value: consortia-system-user
+          action: add
+
+    mod-authtoken:
+      env:
+        - name: JAVA_OPTIONS
+          value: " -Dallow.cross.tenant.requests=true"
+          action: append
+      when:
+        modules-present:
+          - mod-consortia
+
+    # Example: Override memory for a heavy module
+    # mod-data-import:
+    #   docker-args:
+    #     HostConfig:
+    #       Memory: 2147483648  # 2 GB
+
+    # Example: Add volume mounts while preserving existing binds
+    # mod-source-record-manager:
+    #   docker-args:
+    #     HostConfig:
+    #       Binds:
+    #         action: append
+    #         values:
+    #           - "/host/data:/container/data:rw"

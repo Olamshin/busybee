@@ -9,6 +9,7 @@ import jmespath
 import uuid
 from blinker import signal
 from .config import MissingConfigurationException, find_config_file, USER_HOME_DIR, CONFIG_LOCATIONS
+from .transformations import apply_transformations
 
 
 class BusyBee:
@@ -16,6 +17,7 @@ class BusyBee:
     _config = {}
     _install_json = {}
     _mod_descriptors = {}
+    _transformation_config = None
     tenant = {
         "id": "diku",
         "name": "Datalogisk Institut",
@@ -37,6 +39,7 @@ class BusyBee:
         self.error_msg = signal("errors")
 
         self.__load_config()
+        self.__load_transformation_config()
         self.__load_mod_descriptors(False)
         self.okapi_url = self._config["okapi-url"]
 
@@ -56,6 +59,13 @@ class BusyBee:
         with p.open("r") as f:
             config: dict[str, Any] = yaml.safe_load(f)
         self._config = config
+
+    def __load_transformation_config(self):
+        """Load module transformation configuration from config."""
+        if "module-transformations" in self._config:
+            self._transformation_config = self._config["module-transformations"]
+        else:
+            self._transformation_config = None
 
     def __load_mod_descriptors(self, force):
         def fetch_content(path_or_url):
@@ -144,6 +154,7 @@ class BusyBee:
 
     def reload(self):
         self.__load_config()
+        self.__load_transformation_config()
         self.__load_mod_descriptors(True)
 
     def set_module_env_vars(self):
@@ -169,23 +180,20 @@ class BusyBee:
         print("###############")
         modules = self._mod_descriptors
 
-        for module in modules.values():
+        all_module_names = list(modules.keys())
+
+        for module_name, module in modules.items():
             module_id = module["id"]
             module_descriptor = module["desc"]
-            if "launchDescriptor" in module_descriptor:
-                module_descriptor["launchDescriptor"]["dockerArgs"]["HostConfig"]["Memory"] = 1073741824  # 1 GB in bytes default for all
-            if "mod-consortia" in modules and "mod-authtoken" in module_id:
-                env_vars = module_descriptor["launchDescriptor"]["env"]
-                for env_var in env_vars:
-                    if env_var["name"] == "JAVA_OPTIONS":
-                        env_var["value"] += " -Dallow.cross.tenant.requests=true"
 
-            if "mod-consortia" in module_id:
-                env_vars = module_descriptor["launchDescriptor"]["env"]
-                system_user_password_env = {"name": "SYSTEM_USER_PASSWORD", "value": "consortia-system-user"}
-                system_user_username_env = {"name": "SYSTEM_USER_NAME", "value": "consortia-system-user"}
-                env_vars.append(system_user_password_env)
-                env_vars.append(system_user_username_env)
+            # Apply transformations from config
+            if self._transformation_config:
+                module_descriptor = apply_transformations(
+                    module_descriptor,
+                    module_name,
+                    self._transformation_config,
+                    all_module_names
+                )
 
             # check if module is already registered
             resp = requests.get(f"{self.okapi_url}/_/proxy/modules/{module_id}")
